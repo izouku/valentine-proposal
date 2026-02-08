@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Be My Valentine? 💕</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff6b9d 0%, #ffc3a0 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 50px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            max-width: 500px;
+            position: relative;
+        }
+
+        h1 {
+            color: #ff1744;
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(255,23,68,0.2);
+        }
+
+        .heart {
+            font-size: 4em;
+            animation: heartbeat 1.5s infinite;
+            display: inline-block;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            10%, 30% { transform: scale(1.1); }
+            20%, 40% { transform: scale(1); }
+        }
+
+        .question {
+            font-size: 1.8em;
+            color: #333;
+            margin: 30px 0;
+            font-weight: bold;
+        }
+
+        .buttons {
+            margin-top: 40px;
+            position: relative;
+            height: 80px;
+        }
+
+        button {
+            font-size: 1.5em;
+            padding: 15px 40px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        #yesBtn {
+            background: linear-gradient(135deg, #ff1744, #ff5252);
+            color: white;
+        }
+
+        #noBtn {
+            background: linear-gradient(135deg, #9e9e9e, #757575);
+            color: white;
+            position: absolute;
+            transition: all 0.3s ease;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ff1744;
+            animation: fall 3s linear forwards;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 600px;
+        }
+
+        .card h2 {
+            color: #ff1744;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .card p {
+            color: #333;
+            font-size: 1.3em;
+            line-height: 1.6;
+            margin: 15px 0;
+        }
+
+        .hearts-float {
+            position: absolute;
+            font-size: 2em;
+            animation: float 4s ease-in-out infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="hearts-float" style="top: 10%; left: 10%;">💕</div>
+    <div class="hearts-float" style="top: 20%; right: 15%; animation-delay: 1s;">❤️</div>
+    <div class="hearts-float" style="bottom: 15%; left: 20%; animation-delay: 2s;">💖</div>
+    <div class="hearts-float" style="bottom: 25%; right: 10%; animation-delay: 1.5s;">💗</div>
+
+    <div class="container" id="questionContainer">
+        <div class="heart">❤️</div>
+        <h1>Hey Gorgeousness!</h1>
+        <p class="question">Will you be my Valentine?</p>
+        
+        <div class="buttons">
+            <button id="yesBtn">Yes! 💕</button>
+            <button id="noBtn">No</button>
+        </div>
+    </div>
+
+    <div class="container card hidden" id="celebrationCard">
+        <h2>Yay! 🎉💕</h2>
+        <div class="heart">❤️</div>
+        <p>Well done for not saying no it was really an option</p>
+        <p>Love you lots my princess💖</p>
+        <p>Can't wait probably have chipotle or sit and watch sopranos with a takeaway!</p>
+        <p style="font-size: 2em; margin-top: 20px;">❤️ Forever Yours ❤️</p>
+    </div>
+
+    <div class="celebration" id="celebration"></div>
+
+    <script>
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        const questionContainer = document.getElementById('questionContainer');
+        const celebrationCard = document.getElementById('celebrationCard');
+        const celebration = document.getElementById('celebration');
+
+        // Move the No button when mouse gets near or tries to click
+        noBtn.addEventListener('mouseover', moveButton);
+        noBtn.addEventListener('click', moveButton);
+
+        function moveButton() {
+            const container = questionContainer.getBoundingClientRect();
+            const button = noBtn.getBoundingClientRect();
+            
+            // Random position within the container, avoiding edges
+            const maxX = container.width - button.width - 100;
+            const maxY = 60; // Keep it within the buttons area
+            
+            const randomX = Math.random() * maxX;
+            const randomY = Math.random() * maxY - 30;
+            
+            noBtn.style.left = randomX + 'px';
+            noBtn.style.top = randomY + 'px';
+        }
+
+        // Yes button - Show celebration
+        yesBtn.addEventListener('click', function() {
+            // Hide question, show card
+            questionContainer.classList.add('hidden');
+            celebrationCard.classList.remove('hidden');
+            
+            // Create confetti
+            createConfetti();
+            
+            // Play celebration animation
+            celebrationCard.style.animation = 'heartbeat 0.5s ease-in-out 3';
+        });
+
+        function createConfetti() {
+            const colors = ['#ff1744', '#ff5252', '#ff4081', '#f50057', '#ff6b9d', '#ffc3a0'];
+            
+            for (let i = 0; i < 150; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.classList.add('confetti');
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    
+                    // Random shapes
+                    if (Math.random() > 0.5) {
+                        confetti.style.borderRadius = '50%';
+                    }
+                    
+                    celebration.appendChild(confetti);
+                    
+                    // Remove after animation
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 20);
+            }
+        }
+
+        // Initialize no button position
+        noBtn.style.position = 'absolute';
+        noBtn.style.left = '60%';
+        noBtn.style.top = '0';
+    </script>
+</body>
+</html>
